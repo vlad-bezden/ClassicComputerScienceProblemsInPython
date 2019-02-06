@@ -18,6 +18,5 @@ class Tests(unittest.TestCase):
         self.assertEqual(fib(10), 55)
 
 
-
 if __name__ == "__main__":
     unittest.main()
