@@ -90,13 +90,7 @@ class Maze:
 
     def successors(self, ml: MazeLocation) -> List[MazeLocation]:
         """Finds the possible next locations from a given point."""
-        # return [l for l in self.moves if self._is_valid_point(ml.add(l))]
-        moves = []
-        for move in self.moves:
-            new_ml = ml.add(move)
-            if self._is_valid_point(new_ml):
-                moves.append(new_ml)
-        return moves
+        return [ml.add(l) for l in self.moves if self._is_valid_point(ml.add(l))]
 
     def mark(self, path: List[MazeLocation], marker: Cell) -> None:
         for ml in path:
