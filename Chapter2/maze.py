@@ -27,7 +27,7 @@ class MazeLocation(NamedTuple):
         return new_cell
 
 
-class Node(MazeLocation):
+class Node:
     def __init__(
         self,
         state: MazeLocation,
@@ -105,10 +105,12 @@ class Maze:
 
 
 def dfs(
-    initial: T, goal_test: Callable[[T], bool], successors: Callable[[T], List[T]]
-) -> Optional[Node[T]]:
+    initial: MazeLocation,
+    goal_test: Callable[[MazeLocation], bool],
+    successors: Callable[[MazeLocation], List[MazeLocation]],
+) -> Optional[Node]:
     # frontier is where we've yet to go
-    frontier = LifoQueue()
+    frontier: LifoQueue = LifoQueue()
     frontier.put(Node(initial, None))
     # explored is where we've been
     explored = {initial}
@@ -127,7 +129,7 @@ def dfs(
     return None
 
 
-def node_to_path(node: Node[T]) -> List[T]:
+def node_to_path(node: Node) -> List[MazeLocation]:
     path = [node.state]
     while node.parent:
         node = node.parent
