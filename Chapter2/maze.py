@@ -1,10 +1,8 @@
 from __future__ import annotations
 from enum import Enum
-from typing import NamedTuple, List, Tuple, Optional, TypeVar
+from typing import NamedTuple, List, Tuple, Optional, Union
 from random import uniform
 from queue import LifoQueue, Queue
-
-T = TypeVar("T")
 
 
 class Cell(str, Enum):
@@ -103,29 +101,10 @@ class Maze:
             output.append("".join([c.value for c in row]))
         return "\n".join(output)
 
-    def dfs(self) -> Optional[Node]:
+    def calculate(self, storage: Union[LifoQueue, Queue]) -> Optional[Node]:
+        """Uses BFS or DFS based on the storage type."""
         # frontier is where we've yet to go
-        frontier: LifoQueue = LifoQueue()
-        frontier.put(Node(self.start, None))
-        # explored is where we've been
-        explored = {self.start}
-
-        while not frontier.empty():
-            current_node = frontier.get()
-            current_state = current_node.state
-            if self.goal_test(current_state):
-                return current_node
-            for child in self.successors(current_state):
-                # skip children we already explored
-                if child in explored:
-                    continue
-                explored.add(child)
-                frontier.put(Node(child, current_node))
-        return None
-
-    def bfs(self) -> Optional[Node]:
-        # frontier is where we've yet to go
-        frontier: Queue = Queue()
+        frontier = storage()
         frontier.put(Node(self.start, None))
         # explored is where we've been
         explored = {self.start}
@@ -155,23 +134,27 @@ class Maze:
 
 if __name__ == "__main__":
     maze = Maze()
-    # print(maze)
-    solution1 = maze.dfs()
+
+    # DFS
+    solution1 = maze.calculate(LifoQueue)
     if solution1 is None:
+        print(maze)
         print("No solution found using DFS!")
     else:
         path1 = maze.node_to_path(solution1)
         maze.mark(path1, Cell.PATH)
         print(maze)
         maze.mark(path1, Cell.EMPTY)
-
     print("-" * maze._columns)
 
-    solution2 = maze.bfs()
+    # BFS
+    solution2 = maze.calculate(Queue)
     if solution2 is None:
-        print("No solution found using DFS!")
+        print(maze)
+        print("No solution found using BFS!")
     else:
         path2 = maze.node_to_path(solution2)
         maze.mark(path2, Cell.PATH)
         print(maze)
         maze.mark(path2, Cell.EMPTY)
+    print("-" * maze._columns)
