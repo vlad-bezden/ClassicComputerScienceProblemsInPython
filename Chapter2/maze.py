@@ -103,49 +103,44 @@ class Maze:
             output.append("".join([c.value for c in row]))
         return "\n".join(output)
 
+    def dfs(self) -> Optional[Node]:
+        # frontier is where we've yet to go
+        frontier: LifoQueue = LifoQueue()
+        frontier.put(Node(self.start, None))
+        # explored is where we've been
+        explored = {self.start}
 
-def dfs(
-    initial: MazeLocation,
-    goal_test: Callable[[MazeLocation], bool],
-    successors: Callable[[MazeLocation], List[MazeLocation]],
-) -> Optional[Node]:
-    # frontier is where we've yet to go
-    frontier: LifoQueue = LifoQueue()
-    frontier.put(Node(initial, None))
-    # explored is where we've been
-    explored = {initial}
+        while not frontier.empty():
+            current_node = frontier.get()
+            current_state = current_node.state
+            if self.goal_test(current_state):
+                return current_node
+            for child in self.successors(current_state):
+                # skip children we already explored
+                if child in explored:
+                    continue
+                explored.add(child)
+                frontier.put(Node(child, current_node))
+        return None
 
-    while not frontier.empty():
-        current_node = frontier.get()
-        current_state = current_node.state
-        if goal_test(current_state):
-            return current_node
-        for child in successors(current_state):
-            # skip children we already explored
-            if child in explored:
-                continue
-            explored.add(child)
-            frontier.put(Node(child, current_node))
-    return None
-
-
-def node_to_path(node: Node) -> List[MazeLocation]:
-    path = [node.state]
-    while node.parent:
-        node = node.parent
-        path.append(node.state)
-    path.reverse()
-    return path
+    @staticmethod
+    def node_to_path(node: Node) -> List[MazeLocation]:
+        path = [node.state]
+        while node.parent:
+            node = node.parent
+            path.append(node.state)
+        path.reverse()
+        return path
 
 
 if __name__ == "__main__":
     maze = Maze()
-    print(maze)
-    solution1 = dfs(maze.start, maze.goal_test, maze.successors)
+    # print(maze)
+    solution1 = maze.dfs()
     if solution1 is None:
         print("No solution found using DFS!")
     else:
-        path1 = node_to_path(solution1)
+        path1 = maze.node_to_path(solution1)
         maze.mark(path1, Cell.PATH)
         print(maze)
         maze.mark(path1, Cell.EMPTY)
