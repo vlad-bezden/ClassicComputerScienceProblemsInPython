@@ -1,18 +1,18 @@
 from __future__ import annotations
 from enum import Enum
-from typing import NamedTuple, List, Tuple, Optional, TypeVar, Callable
+from typing import NamedTuple, List, Tuple, Optional, TypeVar
 from random import uniform
-from queue import LifoQueue
+from queue import LifoQueue, Queue
 
 T = TypeVar("T")
 
 
 class Cell(str, Enum):
     EMPTY = " "
-    BLOCKED = "X"
+    BLOCKED = "#"
     START = "S"
     GOAL = "G"
-    PATH = "*"
+    PATH = "."
 
 
 Grid = List[List[Cell]]
@@ -123,6 +123,26 @@ class Maze:
                 frontier.put(Node(child, current_node))
         return None
 
+    def bfs(self) -> Optional[Node]:
+        # frontier is where we've yet to go
+        frontier: Queue = Queue()
+        frontier.put(Node(self.start, None))
+        # explored is where we've been
+        explored = {self.start}
+
+        while not frontier.empty():
+            current_node = frontier.get()
+            current_state = current_node.state
+            if self.goal_test(current_state):
+                return current_node
+            for child in self.successors(current_state):
+                # skip children we already explored
+                if child in explored:
+                    continue
+                explored.add(child)
+                frontier.put(Node(child, current_node))
+        return None
+
     @staticmethod
     def node_to_path(node: Node) -> List[MazeLocation]:
         path = [node.state]
@@ -144,3 +164,14 @@ if __name__ == "__main__":
         maze.mark(path1, Cell.PATH)
         print(maze)
         maze.mark(path1, Cell.EMPTY)
+
+    print("-" * maze._columns)
+
+    solution2 = maze.bfs()
+    if solution2 is None:
+        print("No solution found using DFS!")
+    else:
+        path2 = maze.node_to_path(solution2)
+        maze.mark(path2, Cell.PATH)
+        print(maze)
+        maze.mark(path2, Cell.EMPTY)
