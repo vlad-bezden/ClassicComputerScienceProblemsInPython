@@ -101,10 +101,9 @@ class Maze:
             output.append("".join([c.value for c in row]))
         return "\n".join(output)
 
-    def calculate(self, storage: Union[LifoQueue, Queue]) -> Optional[Node]:
+    def calculate(self, frontier: Union[LifoQueue, Queue]) -> Optional[Node]:
         """Uses BFS or DFS based on the storage type."""
         # frontier is where we've yet to go
-        frontier = storage()
         frontier.put(Node(self.start, None))
         # explored is where we've been
         explored = {self.start}
@@ -136,7 +135,7 @@ if __name__ == "__main__":
     maze = Maze()
 
     # DFS
-    solution1 = maze.calculate(LifoQueue)
+    solution1 = maze.calculate(LifoQueue())
     if solution1 is None:
         print(maze)
         print("No solution found using DFS!")
@@ -148,7 +147,7 @@ if __name__ == "__main__":
     print("-" * maze._columns)
 
     # BFS
-    solution2 = maze.calculate(Queue)
+    solution2 = maze.calculate(Queue())
     if solution2 is None:
         print(maze)
         print("No solution found using BFS!")
