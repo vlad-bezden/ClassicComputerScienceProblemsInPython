@@ -1,8 +1,9 @@
 from __future__ import annotations
 from enum import Enum
-from typing import NamedTuple, List, Tuple, Optional, Union
+from typing import NamedTuple, List, Tuple, Optional, Union, Callable
 from random import uniform
-from queue import LifoQueue, Queue
+from queue import LifoQueue, Queue, PriorityQueue
+from math import sqrt
 
 
 class Cell(str, Enum):
@@ -23,6 +24,13 @@ class MazeLocation(NamedTuple):
     def add(self, coord: Tuple[int, int]) -> MazeLocation:
         new_cell = MazeLocation(self.row + coord[0], self.column + coord[1])
         return new_cell
+
+    @staticmethod
+    def manhattan_distance(goal: MazeLocation) -> Callable[[MazeLocation], float]:
+        def distance(ml: MazeLocation) -> float:
+            return abs(ml.column - goal.column) + abs(ml.row - goal.row)
+
+        return distance
 
 
 class Node:
@@ -121,6 +129,28 @@ class Maze:
                 frontier.put(Node(child, current_node))
         return None
 
+    def astar(self) -> Optional[Node]:
+        """Uses A* algorithm to find the shortest distance"""
+        frontier: PriorityQueue = PriorityQueue()
+        distance = MazeLocation.manhattan_distance(self.goal)
+        frontier.put(Node(self.start, None))
+        explored = {self.start: 0.0}
+
+        while not frontier.empty():
+            current_node = frontier.get()
+            current_state = current_node.state
+            if self.goal_test(current_state):
+                return current_node
+            for child in self.successors(current_state):
+                # 1 assumes a grid, need a cost function for more sophisticated apps
+                new_cost = current_node.cost + 1
+                if child not in explored or explored[child] > new_cost:
+                    explored[child] = new_cost
+                    frontier.put(
+                        Node(child, current_node, new_cost, distance(current_state))
+                    )
+        return None
+
     @staticmethod
     def node_to_path(node: Node) -> List[MazeLocation]:
         path = [node.state]
@@ -131,29 +161,37 @@ class Maze:
         return path
 
 
+def print_solution(maze: Maze) -> Callable[[Optional[Node]], None]:
+    def printer(solution):
+        if solution1 is None:
+            print(maze)
+            print("No solution found")
+        else:
+            path = maze.node_to_path(solution)
+            maze.mark(path, Cell.PATH)
+            print(maze)
+            maze.mark(path, Cell.EMPTY)
+            print(f"Path length: {len(path)}")
+        print("-" * maze._columns, "\n")
+
+    return printer
+
+
 if __name__ == "__main__":
     maze = Maze()
+    printer = print_solution(maze)
 
     # DFS
     solution1 = maze.calculate(LifoQueue())
-    if solution1 is None:
-        print(maze)
-        print("No solution found using DFS!")
-    else:
-        path1 = maze.node_to_path(solution1)
-        maze.mark(path1, Cell.PATH)
-        print(maze)
-        maze.mark(path1, Cell.EMPTY)
-    print("-" * maze._columns)
+    print("DFS")
+    printer(solution1)
 
     # BFS
     solution2 = maze.calculate(Queue())
-    if solution2 is None:
-        print(maze)
-        print("No solution found using BFS!")
-    else:
-        path2 = maze.node_to_path(solution2)
-        maze.mark(path2, Cell.PATH)
-        print(maze)
-        maze.mark(path2, Cell.EMPTY)
-    print("-" * maze._columns)
+    print("BFS")
+    printer(solution2)
+
+    # A*
+    solution3 = maze.astar()
+    print("A*")
+    printer(solution3)
