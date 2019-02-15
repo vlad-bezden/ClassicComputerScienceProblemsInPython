@@ -2,11 +2,12 @@
 Missionaries and cannibals task solution
 
 Three missionaries and three cannibals are on the west bank of a river.
-They have a canoe thatcan hold two people, and they all must cross
+They have a canoe that can hold two people, and they all must cross
 to the east bank of the river.
 There may never be more cannibals than missionaries on either side of the river
 or the cannibals will eat the missionaries.
 Further, the canoe must have at least one person on board to cross the river.
+
 What sequence of crossings will successfully take the entire party across the river?
 """
 
@@ -96,7 +97,7 @@ class MCState:
 
     def bfs(self) -> Optional[Node]:
         """Uses BFS to find solution"""
-        frontier = Queue()
+        frontier: Queue = Queue()
         frontier.put(Node(self, None))
         explored = {self}
 
@@ -115,10 +116,12 @@ class MCState:
     @staticmethod
     def display_solution(solution) -> None:
         path = MCState.node_to_path(solution)
+        print_separator = lambda: print("-" * 50, "\n")
         if len(path) == 0:
             return
         old_state = path[0]
-        print(old_state)
+        print("\n", old_state)
+        print_separator()
         for current_state in path[1:]:
             if current_state.boat:
                 print(
@@ -133,8 +136,10 @@ class MCState:
                     "the west bank to the east bank"
                 )
             print(current_state)
+            print_separator()
             old_state = current_state
 
+    @staticmethod
     def node_to_path(node: Node) -> List[MCState]:
         path = [node.state]
         while node.parent:
