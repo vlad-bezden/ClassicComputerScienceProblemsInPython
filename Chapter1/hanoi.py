@@ -4,10 +4,9 @@ We will label them A, B, and C. Donutshaped discs are around tower A.
 The widest disc is at the bottom, and we will call it disc 1.
 The rest of the discs above disc 1 are labeled with increasing numerals
 and get progressively narrower. For instance, if we were to work with three discs,
-the widest disc, the one on the bottom, would be
-
-1. The next widest disc, disc 2, would sit on top of disc 1. And finally,
-the narrowest disc, disc 3, would sit on top of disc 2.
+the widest disc, the one on the bottom, would be 1.
+The next widest disc, disc 2, would sit on top of disc 1.
+And finally, the narrowest disc, disc 3, would sit on top of disc 2.
 Our goal is to move all of the discs from tower A to tower C given the
 following constraints:
 • Only one disc can be moved at a time.
@@ -18,17 +17,26 @@ following constraints:
 from queue import LifoQueue
 import unittest
 
-NUMBER_OF_DISCS = 20
+NUMBER_OF_DISCS = 3
 
 
-def hanoi(begin: LifoQueue, end: LifoQueue, temp: LifoQueue, disk: int) -> None:
+def hanoi(
+    from_peg: LifoQueue, to_peg: LifoQueue, other_peg: LifoQueue, disk: int
+) -> None:
+    """
+    Move the top n disks from peg from_peg to peg to_peg
+    using other_peg to hold disks temporarily as needed.
+    """
     # buttom one
     if disk == 1:
-        end.put(begin.get())
+        to_peg.put(from_peg.get())
     else:
-        hanoi(begin, temp, end, disk - 1)
-        hanoi(begin, end, temp, 1)
-        hanoi(temp, end, begin, disk - 1)
+        # recursively move the top n - 1 disks from from_peg to other_peg
+        hanoi(from_peg, other_peg, to_peg, disk - 1)
+        # move the last disk from from_peg to to_peg
+        hanoi(from_peg, to_peg, other_peg, 1)
+        # recursively move the top n - 1 disks back from other_peg to to_peg
+        hanoi(other_peg, to_peg, from_peg, disk - 1)
 
 
 class Test(unittest.TestCase):
