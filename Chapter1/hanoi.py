@@ -17,7 +17,7 @@ following constraints:
 from queue import LifoQueue
 import unittest
 
-NUMBER_OF_DISCS = 3
+NUMBER_OF_DISCS = 20
 
 
 def hanoi(
@@ -41,8 +41,11 @@ def hanoi(
 
 class Test(unittest.TestCase):
     def test(self):
+        # source
         tower_a = LifoQueue(NUMBER_OF_DISCS)
+        # helper
         tower_b = LifoQueue(NUMBER_OF_DISCS)
+        # target
         tower_c = LifoQueue(NUMBER_OF_DISCS)
 
         for i in range(1, NUMBER_OF_DISCS + 1):
